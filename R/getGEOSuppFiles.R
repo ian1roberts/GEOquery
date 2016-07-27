@@ -1,18 +1,28 @@
+##
+## furl <- "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE15nnn/GSE15852/matrix/"
+## hurl <- "http://ftp.ncbi.nlm.nih.gov/geo/series/GSE15nnn/GSE15852/matrix/"
+
 getDirListing <- function(url) {
   message(url)
   # Takes a URL and returns a character vector of filenames
-  a <- getURL(url)
+  a <- getURL(url, ftp.use.epsv = FALSE, dirlistonly = TRUE)
   ## Renaud Gaujoux reported problems behind firewall
   ## where the ftp index was converted to html content
   ## The IF statement here is his fix--harmless for the rest
   ## of us.
-  if( grepl("^<HTML", a) ){ # process HTML content
+  if( grepl("^<HTML", a, ignore.case=TRUE) ){ # process HTML content
     message("# Processing HTML result page (behind a proxy?) ... ", appendLF=FALSE)
     sa <- gsub('HREF', 'href', a, fixed = TRUE) # just not to depend on case change
     sa <- strsplit(sa, 'href', fixed = TRUE)[[1L]]
     pattern <- "^=\\s*[\"']/[^\"']+/([^/]+)[\"'].*"
     b <- as.matrix(gsub(pattern, "\\1", sa[grepl(pattern, sa)]))
     message('OK')
+  } else if( grepl("HTML PUBLIC", a, ignore.case=TRUE)) {
+	require(XML)
+  	message("# Processing another HTML result page")
+	a <- htmlParse(url)
+	b <- as.matrix(xpathSApply(a, "//a/@href"))
+	message('OK')
   } else { # standard processing of txt content
     tmpcon <- textConnection(a, "r")
     b <- read.table(tmpcon)
@@ -28,13 +38,13 @@ getGEOSuppFiles <- function(GEO,makeDirectory=TRUE,baseDir=getwd()) {
   fileinfo <- list()
   stub = gsub('\\d{1,3}$','nnn',GEO,perl=TRUE)
   if(geotype=='GSM') {
-    url <- sprintf("ftp://ftp.ncbi.nlm.nih.gov/geo/samples/%s/%s/suppl/",stub,GEO)
+    url <- sprintf("http://ftp.ncbi.nlm.nih.gov/geo/samples/%s/%s/suppl/",stub,GEO)
   }
   if(geotype=='GSE') {
-    url <- sprintf("ftp://ftp.ncbi.nlm.nih.gov/geo/series/%s/%s/suppl/",stub,GEO)
+    url <- sprintf("http://ftp.ncbi.nlm.nih.gov/geo/series/%s/%s/suppl/",stub,GEO)
   }
   if(geotype=='GPL') {
-    url <- sprintf("ftp://ftp.ncbi.nlm.nih.gov/geo/platform/%s/%s/suppl/",stub,GEO)
+    url <- sprintf("http://ftp.ncbi.nlm.nih.gov/geo/platform/%s/%s/suppl/",stub,GEO)
   }
   fnames <- try(getDirListing(url),silent=TRUE)
   if(inherits(fnames,'try-error')) {
