@@ -18,10 +18,12 @@ getDirListing <- function(url) {
     b <- as.matrix(gsub(pattern, "\\1", sa[grepl(pattern, sa)]))
     message('OK')
   } else if( grepl("HTML PUBLIC", a, ignore.case=TRUE)) {
-	require(XML)
-  	message("# Processing another HTML result page")
-	a <- htmlParse(url)
-	b <- as.matrix(xpathSApply(a, "//a/@href"))
+	require(xml2)
+  	require(rvest)
+
+	a <- read_html(url)
+	b <- as.matrix(html_attr(html_nodes(a, "a"), "href"))
+
 	message('OK')
   } else { # standard processing of txt content
     tmpcon <- textConnection(a, "r")
