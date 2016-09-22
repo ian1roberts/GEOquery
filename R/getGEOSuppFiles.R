@@ -1,6 +1,6 @@
 ##
 ## furl <- "ftp://ftp.ncbi.nlm.nih.gov/geo/series/GSE15nnn/GSE15852/matrix/"
-## hurl <- "http://ftp.ncbi.nlm.nih.gov/geo/series/GSE15nnn/GSE15852/matrix/"
+## hurl <- "https://ftp.ncbi.nlm.nih.gov/geo/series/GSE15nnn/GSE15852/matrix/"
 
 getDirListing <- function(url) {
   message(url)
@@ -38,13 +38,13 @@ getGEOSuppFiles <- function(GEO,makeDirectory=TRUE,baseDir=getwd()) {
   fileinfo <- list()
   stub = gsub('\\d{1,3}$','nnn',GEO,perl=TRUE)
   if(geotype=='GSM') {
-    url <- sprintf("http://ftp.ncbi.nlm.nih.gov/geo/samples/%s/%s/suppl/",stub,GEO)
+    url <- sprintf("https://ftp.ncbi.nlm.nih.gov/geo/samples/%s/%s/suppl/",stub,GEO)
   }
   if(geotype=='GSE') {
-    url <- sprintf("http://ftp.ncbi.nlm.nih.gov/geo/series/%s/%s/suppl/",stub,GEO)
+    url <- sprintf("https://ftp.ncbi.nlm.nih.gov/geo/series/%s/%s/suppl/",stub,GEO)
   }
   if(geotype=='GPL') {
-    url <- sprintf("http://ftp.ncbi.nlm.nih.gov/geo/platform/%s/%s/suppl/",stub,GEO)
+    url <- sprintf("https://ftp.ncbi.nlm.nih.gov/geo/platform/%s/%s/suppl/",stub,GEO)
   }
   fnames <- try(getDirListing(url),silent=TRUE)
   if(inherits(fnames,'try-error')) {
